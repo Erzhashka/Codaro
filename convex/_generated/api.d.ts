@@ -12,6 +12,7 @@ import type * as communities from "../communities.js";
 import type * as messages from "../messages.js";
 import type * as posts from "../posts.js";
 import type * as presence from "../presence.js";
+import type * as rooms from "../rooms.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   posts: typeof posts;
   presence: typeof presence;
+  rooms: typeof rooms;
   seed: typeof seed;
   users: typeof users;
 }>;

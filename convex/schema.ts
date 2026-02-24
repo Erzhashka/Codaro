@@ -38,6 +38,18 @@ export default defineSchema({
     communityId: v.id("communities"),
     authorId: v.id("users"),
     content: v.string(),
+    roomId: v.optional(v.id("rooms")),
     metadata: v.any(),
-  }).index("by_community", ["communityId"]),
+  })
+    .index("by_community", ["communityId"])
+    .index("by_room", ["roomId"]),
+
+  rooms: defineTable({
+    communityId: v.id("communities"),
+    name: v.string(),
+    slug: v.string(),
+    metadata: v.any(),
+  })
+    .index("by_community", ["communityId"])
+    .index("by_slug", ["slug"]),
 });

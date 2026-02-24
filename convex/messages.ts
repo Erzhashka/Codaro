@@ -4,13 +4,20 @@ import { v } from "convex/values";
 export const listByCommunity = query({
   args: {
     communityId: v.id("communities"),
+    roomId: v.optional(v.id("rooms")),
   },
   handler: async (context, args) => {
-    const messages = await context.db
+    const baseQuery = context.db
       .query("messages")
-      .withIndex("by_community", (queryBuilder) => queryBuilder.eq("communityId", args.communityId))
-      .order("desc")
-      .take(30);
+      .withIndex("by_community", (queryBuilder) => queryBuilder.eq("communityId", args.communityId));
+
+    const messages = args.roomId
+      ? await context.db
+          .query("messages")
+          .withIndex("by_room", (queryBuilder) => queryBuilder.eq("roomId", args.roomId))
+          .order("desc")
+          .take(30)
+      : await baseQuery.order("desc").take(30);
 
     const hydratedMessages = await Promise.all(
       messages.map(async (messageDocument) => {
@@ -31,6 +38,7 @@ export const send = mutation({
     communityId: v.id("communities"),
     authorId: v.id("users"),
     content: v.string(),
+    roomId: v.optional(v.id("rooms")),
     metadata: v.any(),
   },
   handler: async (context, args) => {
@@ -38,6 +46,7 @@ export const send = mutation({
       communityId: args.communityId,
       authorId: args.authorId,
       content: args.content,
+      roomId: args.roomId,
       metadata: args.metadata,
     });
 
