@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
 body {
-  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100;
+  @apply bg-neutral-950 text-yellow-400 antialiased;
+  font-family: "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+  font-size: 13px;
+}
+
+input, select, textarea {
+  @apply bg-neutral-900 border border-neutral-700 text-neutral-100 rounded px-2 py-1.5 text-sm font-mono;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  @apply outline-none border-amber-500 ring-1 ring-amber-500/30;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
 }

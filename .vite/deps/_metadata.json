@@ -1,0 +1,55 @@
+{
+  "hash": "6df59c04",
+  "configHash": "7e6346c8",
+  "lockfileHash": "28bbc929",
+  "browserHash": "febb6fc7",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "38e3c212",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "d5716704",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "437ce6d7",
+      "needsInterop": true
+    },
+    "convex/react": {
+      "src": "../../node_modules/convex/dist/esm/react/index.js",
+      "file": "convex_react.js",
+      "fileHash": "3f68c913",
+      "needsInterop": false
+    },
+    "convex/server": {
+      "src": "../../node_modules/convex/dist/esm/server/index.js",
+      "file": "convex_server.js",
+      "fileHash": "399d3a51",
+      "needsInterop": false
+    },
+    "lucide-react": {
+      "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "c73750c3",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-UEDEN36Y": {
+      "file": "chunk-UEDEN36Y.js"
+    },
+    "chunk-3O5KNQLG": {
+      "file": "chunk-3O5KNQLG.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}
