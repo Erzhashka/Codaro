@@ -16,6 +16,12 @@ const TerrainMap = lazy(() => import("./components/TerrainMap"));
 
 // ── Types ──────────────────────────────────────────────
 
+interface PersonData {
+  weight: string;
+  height: string;
+  healthProblems: string;
+}
+
 interface RescueData {
   // Environment
   altitude: string;
@@ -26,10 +32,7 @@ interface RescueData {
   recentSnowfall: string;
   slopeAngle: string;
   // Patient(s)
-  numberOfPeople: string;
-  weight: string;
-  height: string;
-  healthProblems: string;
+  persons: PersonData[];
   estimatedDuration: string;
 }
 
@@ -139,14 +142,23 @@ export default function App() {
     weatherCondition: "snow",
     recentSnowfall: "20",
     slopeAngle: "32",
-    numberOfPeople: "1",
-    weight: "75",
-    height: "175",
-    healthProblems: "",
+    persons: [
+      { weight: "75", height: "175", healthProblems: "" },
+      { weight: "68", height: "168", healthProblems: "" },
+      { weight: "82", height: "180", healthProblems: "" },
+    ],
     estimatedDuration: "45",
   });
+  const [activePerson, setActivePerson] = useState(0);
+  const [audioOn, setAudioOn] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const set = (key: keyof RescueData) => (value: string) => setData((d) => ({ ...d, [key]: value }));
+  const setPerson = (idx: number, key: keyof PersonData) => (value: string) =>
+    setData((d) => ({
+      ...d,
+      persons: d.persons.map((p, i) => i === idx ? { ...p, [key]: value } : p)
+    }));
 
   const avRisk = useMemo(() =>
     avalancheRisk(
@@ -160,14 +172,11 @@ export default function App() {
   const o2 = useMemo(() =>
     oxygenCalc(
       parseFloat(data.altitude) || 0,
-      parseInt(data.numberOfPeople) || 1,
+      data.persons.length,
       parseFloat(data.estimatedDuration) || 30,
-    ), [data.altitude, data.numberOfPeople, data.estimatedDuration]
+    ), [data.altitude, data.persons.length, data.estimatedDuration]
   );
 
-  // ── Audio narration ──
-  const [audioOn, setAudioOn] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [intervalSec, setIntervalSec] = useState(15);
 
@@ -179,9 +188,11 @@ export default function App() {
     lines.push(`Visibility is ${data.visibility} meters.`);
     lines.push(`Weather conditions are ${data.weatherCondition}.`);
     lines.push(`Avalanche risk is ${avRisk.level}, at ${avRisk.pct} percent.`);
-    lines.push(`There ${parseInt(data.numberOfPeople) === 1 ? "is" : "are"} ${data.numberOfPeople} ${parseInt(data.numberOfPeople) === 1 ? "person" : "people"}.`);
-    lines.push(`Weight is ${data.weight} kilograms, height is ${data.height} centimeters.`);
-    if (data.healthProblems.trim()) lines.push(`Health problems include ${data.healthProblems}.`);
+    lines.push(`There ${data.persons.length === 1 ? "is" : "are"} ${data.persons.length} ${data.persons.length === 1 ? "person" : "people"}.`);
+    data.persons.forEach((person, idx) => {
+      lines.push(`Person ${idx + 1}: Weight is ${person.weight} kilograms, height is ${person.height} centimeters.`);
+      if (person.healthProblems.trim()) lines.push(`Health problems include ${person.healthProblems}.`);
+    });
     lines.push(`Oxygen required is ${o2.totalLiters} liters, at a flow rate of ${o2.flowRate} liters per minute.`);
     return lines.join(" ");
   }, [data, avRisk, o2]);
@@ -279,14 +290,21 @@ export default function App() {
           </div>
           <div>
             <div className="text-neutral-500 text-xs uppercase tracking-wider">Avalanche</div>
-            <div className={`text-2xl font-bold tabular-nums ${avRisk.color}`}>
-              {avRisk.level}<span className="text-sm font-normal text-neutral-500 ml-1">{avRisk.pct}%</span>
+            <div className="flex items-center gap-2">
+              <span className={`inline-block w-3 h-3 rounded-full border border-neutral-700 ${
+                avRisk.level === 'EXTREME' ? 'bg-black' :
+                avRisk.level === 'HIGH' ? 'bg-red-500' :
+                avRisk.level === 'MODERATE' ? 'bg-yellow-400' :
+                'bg-green-400'
+              }`}></span>
+              <span className={`text-2xl font-bold tabular-nums ${avRisk.color}`}>{avRisk.level}</span>
+              <span className="text-sm font-normal text-neutral-500 ml-1">{avRisk.pct}%</span>
             </div>
           </div>
           <div>
             <div className="text-neutral-500 text-xs uppercase tracking-wider">People</div>
             <div className="text-2xl font-bold tabular-nums text-white">
-              {data.numberOfPeople || "—"}<span className="text-sm font-normal text-neutral-500 ml-1">per</span>
+              {data.persons.length}<span className="text-sm font-normal text-neutral-500 ml-1">per</span>
             </div>
           </div>
           <div>
@@ -304,18 +322,32 @@ export default function App() {
         {/* ── LEFT: Patient ── */}
         <div className="space-y-3">
           <Card title="Patient Information" icon={Users}>
-            <Field label="Number of people" unit="per" value={data.numberOfPeople} onChange={set("numberOfPeople")} id="pax" />
-            <Field label="Weight" unit="kg" value={data.weight} onChange={set("weight")} id="wt" />
-            <Field label="Height" unit="cm" value={data.height} onChange={set("height")} id="ht" />
+            <div className="mb-2 flex gap-2">
+              {data.persons.map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`px-3 py-1 rounded-t font-mono text-xs border-b-2 transition-all ${
+                    activePerson === idx
+                      ? 'border-amber-400 bg-neutral-800 text-amber-300'
+                      : 'border-transparent bg-neutral-900 text-neutral-400 hover:text-white'
+                  }`}
+                  onClick={() => setActivePerson(idx)}
+                >
+                  Person {idx + 1}
+                </button>
+              ))}
+            </div>
+            <Field label="Weight" unit="kg" value={data.persons[activePerson].weight} onChange={setPerson(activePerson, "weight")} id="wt" />
+            <Field label="Height" unit="cm" value={data.persons[activePerson].height} onChange={setPerson(activePerson, "height")} id="ht" />
             <div>
               <label htmlFor="hp" className="text-neutral-500 text-[10px] uppercase tracking-wider block mb-1">Health problems / injuries</label>
               <textarea
                 id="hp"
                 rows={3}
-                value={data.healthProblems}
-                onChange={(e) => set("healthProblems")(e.target.value)}
+                value={data.persons[activePerson].healthProblems}
+                onChange={(e) => setPerson(activePerson, "healthProblems")(e.target.value)}
                 className="w-full bg-neutral-900 border border-neutral-700 text-neutral-100 rounded px-2 py-1.5 text-sm font-mono resize-none"
-                placeholder="e.g. hypothermia, fractured tibia, AMS..."
+                placeholder="hypothermia, fractured tibia, AMS..."
               />
             </div>
           </Card>
@@ -356,10 +388,6 @@ export default function App() {
             <Field label="Recent snowfall" unit="cm" value={data.recentSnowfall} onChange={set("recentSnowfall")} id="snow" />
             <Field label="Slope angle" unit="°" value={data.slopeAngle} onChange={set("slopeAngle")} id="slope" />
             <div className="pt-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-neutral-500 text-xs uppercase tracking-wider">Risk level</span>
-                <span className={`text-sm font-bold ${avRisk.color}`}>{avRisk.level} ({avRisk.pct}%)</span>
-              </div>
               <RiskBar pct={avRisk.pct} color={avRisk.color} />
             </div>
           </Card>
