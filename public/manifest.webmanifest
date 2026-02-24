@@ -1,0 +1,16 @@
+{
+  "name": "Nexus Core",
+  "short_name": "Nexus",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/convex-favicon.ico",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
